@@ -1,13 +1,10 @@
 import cv2
 import time
 from datetime import datetime, timedelta
-from datetime import datetime, timedelta
 import os
 from PIL import Image
-import numpy as np
 import psutil
 import threading
-import warnings
 
 ''' Process Monitoring
 class MemoryMonitorThread(threading.Thread):
@@ -35,10 +32,10 @@ class MemoryMonitorThread(threading.Thread):
 
 images_dir = f"C:/Users/heath/OneDrive/Personal Projects/Timelapse/{int(time.mktime(datetime.now().timetuple()))}"
 
-start_time = datetime.now() #datetime(2023, 9, 8, 8, 30)
-duration = timedelta(minutes=1)
+start_time = datetime(2023, 9, 8, 8)
+duration = timedelta(hours=4)
 end_time = start_time + duration
-interval = 0.05 # interval between pictures in minutes
+interval = 2 # interval between pictures in minutes
 
 def create_images_dir(dir=None):
     global images_dir
