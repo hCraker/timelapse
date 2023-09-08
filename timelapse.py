@@ -1,11 +1,13 @@
 import cv2
 import time
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 import os
 from PIL import Image
 import numpy as np
 import psutil
 import threading
+import warnings
 
 ''' Process Monitoring
 class MemoryMonitorThread(threading.Thread):
@@ -48,7 +50,7 @@ def create_images_dir(dir=None):
     else:
         print(f"Directory already exists: {images_dir}")
 
-def capture_image():
+def capture_image():    
     # Access the webcam
     cap = cv2.VideoCapture(0)
 
@@ -91,7 +93,7 @@ def create_gif(start_time):
     
     # Get the list of JPEG files in the image directory
     for filename in os.listdir(images_dir):
-        if filename.endswith(".png"):
+        if filename.endswith(".jpg"):
             file_path = os.path.join(images_dir, filename)
             
             # Open each image and append it to the list
@@ -103,15 +105,14 @@ def create_gif(start_time):
 
     print(f"GIF file created: {output_file}")
 
+
 def main():
+
     create_images_dir()
 
     monitor_thread = None
 
     try:
-        # Start monitoring memory usage in a separate thread
-        #monitor_thread = MemoryMonitorThread()
-        #monitor_thread.start()
         print("Begin Image Capture")
         while datetime.now() > start_time:
             if datetime.now() < end_time:
@@ -132,6 +133,7 @@ def main():
         #            monitor_thread.stop()  # Signal the monitoring thread to stop
         #            monitor_thread.join()  # Wait for the monitoring thread to finish
         print("Exiting program.")
+
         
 if __name__ == '__main__':
     main()
