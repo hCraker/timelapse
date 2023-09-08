@@ -48,48 +48,6 @@ def create_images_dir(dir=None):
     else:
         print(f"Directory already exists: {images_dir}")
 
-def adjust_brightness(image, value):
-    # Convert the image to the LAB color space
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    
-    # Split the LAB channels
-    l, a, b = cv2.split(lab)
-    
-    # Adjust the L channel (brightness)
-    l = cv2.add(l, value)
-    
-    # Clip the values to the valid range of 0-255
-    l = np.clip(l, 0, 255)
-    
-    # Merge the LAB channels back together
-    adjusted_lab = cv2.merge((l, a, b))
-    
-    # Convert back to the BGR color space
-    adjusted_image = cv2.cvtColor(adjusted_lab, cv2.COLOR_LAB2BGR)
-    
-    return adjusted_image
-
-def adjust_contrast(image, value):
-    # Convert the image to the LAB color space
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    
-    # Split the LAB channels
-    l, a, b = cv2.split(lab)
-    
-    # Adjust the L channel (contrast)
-    l = cv2.multiply(l, value)
-    
-    # Clip the values to the valid range of 0-255
-    l = np.clip(l, 0, 255)
-    
-    # Merge the LAB channels back together
-    adjusted_lab = cv2.merge((l, a, b))
-    
-    # Convert back to the BGR color space
-    adjusted_image = cv2.cvtColor(adjusted_lab, cv2.COLOR_LAB2BGR)
-    
-    return adjusted_image
-
 def capture_image():
     # Access the webcam
     cap = cv2.VideoCapture(0)
