@@ -1,13 +1,13 @@
 import cv2
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from PIL import Image
 import numpy as np
 import psutil
 import threading
 
-#''' Process Monitoring
+''' Process Monitoring
 class MemoryMonitorThread(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -31,7 +31,12 @@ class MemoryMonitorThread(threading.Thread):
             time.sleep(1)
 #'''
 
-images_dir = "C:/Users/heath/OneDrive/Personal Projects/Timelapse/images"
+images_dir = f"C:/Users/heath/OneDrive/Personal Projects/Timelapse/{int(time.mktime(datetime.now().timetuple()))}"
+
+start_time = datetime.now() #datetime(2023, 9, 8, 8, 30)
+duration = timedelta(minutes=1)
+end_time = start_time + duration
+interval = 0.05 # interval between pictures in minutes
 
 def create_images_dir(dir=None):
     global images_dir
@@ -91,36 +96,39 @@ def capture_image():
 
     # Check if the webcam is opened successfully
     if not cap.isOpened():
-        print("Failed to open the webcam")
+        print(f"Failed to open the webcam at {datetime.now()}")
         return
 
+    # Turn on camera capture
+    cap.read()
+    # Wait for camera warmup
+    time.sleep(1)
     # Read an image from the webcam
-    for i in range(0,30):
-        ret, frame = cap.read()
+    ret, frame = cap.read()
 
     # Check if the image was successfully captured
     if not ret:
-        print("Failed to capture the image")
+        print(f"Failed to capture the image at {datetime.now()}")
         return
-
-    # Adjust the brightness and contrast of the image
-    adjusted_frame = frame
-    #adjusted_frame = adjust_brightness(frame, 100)  # Adjust brightness to make the image darker
-    #adjusted_frame = adjust_contrast(adjusted_frame, 1.5)  # Adjust contrast
  
     # Generate a human-readable filename with colons replaced by dashes
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"{images_dir}/image_{current_time}.png"
 
-    # Save the adjusted image
-    cv2.imwrite(filename, adjusted_frame)
+    # Save the image
+    cv2.imwrite(filename, frame)
 
     # Release the webcam
     cap.release()
 
     print(f"Image captured: {filename}")
 
-def create_gif(output_file):
+def create_gif(start_time):
+    print('Creating timelapse...')
+    start_str = start_time.strftime("%Y-%m-%d--%H-%M")
+    end_str = datetime.now().strftime("%Y-%m-%d--%H-%M")
+    output_file = f"{images_dir}/timelapse_{start_str}_{end_str}.gif"
+    
     images = []
     
     # Get the list of JPEG files in the image directory
@@ -133,7 +141,7 @@ def create_gif(output_file):
             images.append(image)
 
     # Save the list of images as an animated GIF
-    images[0].save(output_file, save_all=True, append_images=images[1:], loop=0, duration=200)
+    images[0].save(output_file, format="GIF", append_images=images[1:], save_all=True, duration=200, loop=0)
 
     print(f"GIF file created: {output_file}")
 
@@ -141,32 +149,25 @@ def main():
     create_images_dir()
 
     monitor_thread = None
-    start_time = datetime.now()#(2023, 6, 7, 4, 0, 0) # time to start recording images
-    end_time = datetime(2023,6,7,18,0,0)
+
     try:
         # Start monitoring memory usage in a separate thread
         #monitor_thread = MemoryMonitorThread()
         #monitor_thread.start()
         print("Begin Image Capture")
-        while datetime.now() < end_time:
-            if datetime.now() > start_time:
+        while datetime.now() > start_time:
+            if datetime.now() < end_time:
                 capture_image()
-            time.sleep(60*5) # Wait
+            else:
+                break 
+            time.sleep(60*interval) # Wait
 
-        print('Creating timelapse...')
-        start_str = start_time.strftime("%Y-%m-%d")
-        end_str = end_time.strftime("%Y-%m-%d")
-        gif_filename = f"./timelapse_{start_str}_{end_str}.gif"
-        create_gif(gif_filename)
+        create_gif(start_time)
 
     except KeyboardInterrupt:
         print('Keyboard Interrupt!')
         
-        print('Creating timelapse...')
-        start_str = start_time.strftime("%Y-%m-%d_%H-%M")
-        end_str = datetime.now().strftime("%Y-%m-%d_%H-%M")
-        gif_filename = f"./timelapse_{start_str}_{end_str}.gif"
-        create_gif(gif_filename)
+        create_gif(start_time)
         
         print("Cleaning up...")
         #if monitor_thread is not None:
